@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/plantilla :: bootstrap">
+    <title>Listado de Árboles</title>
+</head>
+
+<body>
+<header th:replace="fragments/plantilla :: header"></header>
+
+<main class="container mt-4">
+
+    <h2 class="mb-3">Árboles</h2>
+
+    <!-- mensajes -->
+    <div th:if="${todoOk}" class="alert alert-success" th:text="${todoOk}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- FORM CREAR / GUARDAR -->
+    <div class="card mb-4">
+        <div class="card-header">Crear / Guardar Árbol</div>
+        <div class="card-body">
+
+            <form th:action="@{/arbol/guardar}" th:object="${arbol}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:field="*{idArbol}"/>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre común</label>
+                        <input class="form-control" type="text" th:field="*{nombreComun}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('nombreComun')}" th:errors="*{nombreComun}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de flor</label>
+                        <input class="form-control" type="text" th:field="*{tipoFlor}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('tipoFlor')}" th:errors="*{tipoFlor}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Dureza de madera</label>
+                        <input class="form-control" type="number" th:field="*{durezaMadera}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('durezaMadera')}" th:errors="*{durezaMadera}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Altura (metros)</label>
+                        <input class="form-control" type="number" step="0.01" th:field="*{alturaMetros}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('alturaMetros')}" th:errors="*{alturaMetros}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Imagen</label>
+                        <input class="form-control" type="file" name="imagenFile" accept="image/*">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ruta imagen (URL)</label>
+                        <input class="form-control" type="text" th:field="*{rutaImagen}" placeholder="/img/arbol/img00000000000001.jpg">
+                        <small class="text-muted">Se llena sola cuando subís imagen .</small>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" th:field="*{activo}">
+                            <label class="form-check-label">Activo</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end justify-content-end">
+                        <button class="btn btn-primary" type="submit">Guardar</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- TABLA LISTADO -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Listado</span>
+            <span class="badge bg-secondary" th:text="'Total: ' + ${totalArboles}"></span>
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre común</th>
+                        <th>Tipo flor</th>
+                        <th>Dureza</th>
+                        <th>Altura</th>
+                        <th>Imagen</th>
+                        <th>Activo</th>
+                        <th style="width: 220px;">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="a : ${arboles}">
+                        <td th:text="${a.idArbol}"></td>
+                        <td th:text="${a.nombreComun}"></td>
+                        <td th:text="${a.tipoFlor}"></td>
+                        <td th:text="${a.durezaMadera}"></td>
+                        <td th:text="${a.alturaMetros}"></td>
+
+                        <td>
+                            <img th:if="${a.rutaImagen != null && !#strings.isEmpty(a.rutaImagen)}"
+                                 th:src="@{${a.rutaImagen}}"
+                                 style="max-height:60px; border-radius:6px;">
+                            <span th:if="${a.rutaImagen == null || #strings.isEmpty(a.rutaImagen)}" class="text-muted">Sin imagen</span>
+                        </td>
+
+                        <td>
+                            <span th:if="${a.activo}" class="badge bg-success">Sí</span>
+                            <span th:if="${!a.activo}" class="badge bg-danger">No</span>
+                        </td>
+
+                        <td>
+                            <a class="btn btn-sm btn-warning"
+                               th:href="@{/arbol/modificar/{id}(id=${a.idArbol})}">
+                                Modificar
+                            </a>
+
+                            <form th:action="@{/arbol/eliminar}" method="post" style="display:inline;">
+                                <input type="hidden" name="idArbol" th:value="${a.idArbol}">
+                                <button class="btn btn-sm btn-danger" type="submit"
+                                        onclick="return confirm('¿Seguro que desea eliminar este árbol?');">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${arboles == null || arboles.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted">No hay árboles registrados.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="fragments/plantilla :: footer"></footer>
+</body>
+</html>
