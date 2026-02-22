@@ -7,11 +7,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -37,6 +33,7 @@ public class ArbolController {
         return "/arbol/listado";
     }
 
+    // MODIFICAR
     @PostMapping("/guardar")
     public String guardar(
             @Valid Arbol arbol,
@@ -48,7 +45,9 @@ public class ArbolController {
 
             redirectAttributes.addFlashAttribute("todoOk",
                     messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+
         } catch (Exception e) {
+
             redirectAttributes.addFlashAttribute("error",
                     "No se pudo guardar. Revise los datos.");
         }
@@ -56,30 +55,41 @@ public class ArbolController {
         return "redirect:/arbol/listado";
     }
 
-    // MODIFICAR
+    //MODIFICAR
     @GetMapping("/modificar/{idArbol}")
-    public String modificar(@PathVariable Integer idArbol, Model model, RedirectAttributes ra) {
+    public String modificar(@PathVariable Integer idArbol,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+
         var arbolOpt = arbolService.getArbol(idArbol);
 
         if (arbolOpt.isEmpty()) {
-            ra.addFlashAttribute("error", "El árbol no existe.");
+            redirectAttributes.addFlashAttribute("error",
+                    "El árbol no existe.");
             return "redirect:/arbol/listado";
         }
 
         model.addAttribute("arbol", arbolOpt.get());
         return "/arbol/modifica";
     }
-
+ 
     // ELIMINAR
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam Integer idArbol, RedirectAttributes ra) {
+    public String eliminar(@RequestParam Integer idArbol,
+                           RedirectAttributes redirectAttributes) {
+
         try {
             arbolService.delete(idArbol);
-            ra.addFlashAttribute("todoOk",
+
+            redirectAttributes.addFlashAttribute("todoOk",
                     messageSource.getMessage("mensaje.eliminado", null, Locale.getDefault()));
+
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "No se pudo eliminar (puede tener datos asociados).");
+
+            redirectAttributes.addFlashAttribute("error",
+                    "No se pudo eliminar (puede tener datos asociados).");
         }
+
         return "redirect:/arbol/listado";
     }
 }
