@@ -21,7 +21,7 @@ public class StorageService {
         String ext = "";
 
         if (original != null && original.contains(".")) {
-            ext = original.substring(original.lastIndexOf(".")); // .jpg .png
+            ext = original.substring(original.lastIndexOf(".")); 
         }
 
         String fileName = "img" + String.format("%014d", idArbol) + ext;
@@ -29,7 +29,6 @@ public class StorageService {
 
         Files.copy(file.getInputStream(), destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-        // Esta es la ruta que se usa en HTML (URL)
         return "/img/arbol/" + fileName;
     }
 }

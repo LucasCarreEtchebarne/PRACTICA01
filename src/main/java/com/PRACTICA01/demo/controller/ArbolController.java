@@ -7,8 +7,11 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -34,31 +37,26 @@ public class ArbolController {
         return "/arbol/listado";
     }
 
-    // GUARDAR
     @PostMapping("/guardar")
     public String guardar(
             @Valid Arbol arbol,
-            BindingResult br,
             @RequestParam(required = false) MultipartFile imagenFile,
-            RedirectAttributes ra,
-            Model model) {
+            RedirectAttributes redirectAttributes) {
 
-        if (br.hasErrors()) {
-            var arboles = arbolService.getArboles();
-            model.addAttribute("arboles", arboles);
-            model.addAttribute("totalArboles", arboles.size());
-            model.addAttribute("arbol", arbol);
-            return "/arbol/listado";
+        try {
+            arbolService.save(arbol, imagenFile);
+
+            redirectAttributes.addFlashAttribute("todoOk",
+                    messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "No se pudo guardar. Revise los datos.");
         }
 
-        arbolService.save(arbol, imagenFile);
-
-        ra.addFlashAttribute("todoOk",
-                messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
         return "redirect:/arbol/listado";
     }
 
-    // MODIFICAR 
+    // MODIFICAR
     @GetMapping("/modificar/{idArbol}")
     public String modificar(@PathVariable Integer idArbol, Model model, RedirectAttributes ra) {
         var arbolOpt = arbolService.getArbol(idArbol);
@@ -69,7 +67,7 @@ public class ArbolController {
         }
 
         model.addAttribute("arbol", arbolOpt.get());
-        return "/arbol/modifica"; // 
+        return "/arbol/modifica";
     }
 
     // ELIMINAR
